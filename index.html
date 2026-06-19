@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Personel Takip</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f1117;color:#e8eaf0;min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+#home{background:#0f1117;align-items:center;justify-content:center;gap:28px;padding:48px 28px}
+.logo-icon{width:88px;height:88px;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);border-radius:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:40px;box-shadow:0 8px 32px rgba(79,142,247,.35)}
+.logo-title{font-size:26px;font-weight:700;color:#fff;text-align:center}
+.logo-sub{font-size:14px;color:#8892a0;text-align:center;margin-top:6px}
+.home-btn{width:100%;max-width:320px;padding:18px;border-radius:16px;border:none;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;font-family:inherit;touch-action:manipulation}
+.btn-personnel{background:linear-gradient(135deg,#4f8ef7,#7c5cfc);color:#fff;box-shadow:0 4px 20px rgba(79,142,247,.4)}
+.btn-admin{background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12)}
+.topbar{background:#1a1f2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:10}
+.back-btn{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.08);border:none;color:#e8eaf0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;font-family:inherit;touch-action:manipulation}
+.topbar-title{font-size:17px;font-weight:600;color:#fff}
+.topbar-sub{font-size:12px;color:#8892a0;margin-top:1px}
+#personnel{background:#0f1117}
+.personnel-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.sec-label{font-size:11px;color:#8892a0;margin-bottom:7px;display:block;text-transform:uppercase;letter-spacing:.7px;font-weight:600}
+.staff-select-box{background:#1a1f2e;border-radius:14px;border:1px solid rgba(255,255,255,.09);overflow:hidden}
+.staff-search{width:100%;padding:14px 16px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.07);color:#e8eaf0;font-size:15px;outline:none;font-family:inherit}
+.staff-search::placeholder{color:#8892a0}
+.staff-list{max-height:220px;overflow-y:auto}
+.staff-item{padding:14px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:10px;transition:background .15s;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.staff-item:last-child{border:none}
+.staff-item:active,.staff-item.selected{background:rgba(79,142,247,.15)}
+.staff-item.selected .staff-item-name{color:#4f8ef7;font-weight:600}
+.staff-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.staff-item-name{font-size:14px;color:#e8eaf0;flex:1}
+.staff-empty{padding:24px;text-align:center;color:#8892a0;font-size:13px}
+.selected-badge{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);border-radius:12px;padding:12px 14px;display:none;align-items:center;gap:10px}
+.selected-name{font-size:14px;font-weight:600;color:#4f8ef7;flex:1}
+.sel-clear{background:none;border:none;color:#8892a0;cursor:pointer;font-size:20px;padding:0;touch-action:manipulation}
+.location-card{background:#1a1f2e;border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08)}
+.location-row{display:flex;align-items:center;gap:12px}
+.loc-icon{width:42px;height:42px;border-radius:11px;background:rgba(79,142,247,.13);display:flex;align-items:center;justify-content:center;color:#4f8ef7;font-size:21px;flex-shrink:0}
+.loc-text{flex:1;min-width:0}
+.loc-label{font-size:11px;color:#8892a0;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.loc-status{font-size:13px;font-weight:500;margin-top:3px;word-break:break-word}
+.loc-ok{color:#4ade80}.loc-err{color:#f87171}.loc-wait{color:#facc15}
+.refresh-btn{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#8892a0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;touch-action:manipulation}
+.check-btn{width:100%;padding:17px;border-radius:14px;border:none;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .15s;font-family:inherit;touch-action:manipulation}
+.check-btn:active{transform:scale(.97)}
+.check-in{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,.3)}
+.check-out{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 4px 16px rgba(249,115,22,.3)}
+.check-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
+.status-card{background:#1a1f2e;border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08)}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.status-row:last-child{border:none}
+.status-label{font-size:13px;color:#8892a0}
+.status-val{font-size:13px;font-weight:500;color:#e8eaf0}
+.badge{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-in{background:rgba(74,222,128,.15);color:#4ade80}
+.badge-out{background:rgba(248,113,113,.15);color:#f87171}
+.badge-none{background:rgba(255,255,255,.08);color:#8892a0}
+.badge-warn{background:rgba(250,204,21,.15);color:#facc15}
+.msg-box{padding:13px 16px;border-radius:12px;font-size:14px;font-weight:600;text-align:center;display:none}
+.msg-success{background:rgba(74,222,128,.13);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+.msg-error{background:rgba(248,113,113,.13);color:#f87171;border:1px solid rgba(248,113,113,.25)}
+#adminlogin{background:#0f1117;align-items:center;justify-content:center;padding:40px 24px}
+.login-card{background:#1a1f2e;border-radius:22px;padding:30px 24px;width:100%;max-width:340px;border:1px solid rgba(255,255,255,.09)}
+.login-card h2{font-size:21px;font-weight:700;color:#fff;margin-bottom:4px}
+.login-card p{font-size:13px;color:#8892a0;margin-bottom:24px}
+.login-input{width:100%;padding:14px 16px;background:#0f1117;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#e8eaf0;font-size:15px;outline:none;margin-bottom:12px;font-family:inherit}
+.login-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.login-err{color:#f87171;font-size:12px;margin-top:10px;display:none;font-weight:500}
+#admin{background:#0f1117}
+.admin-tab-row{display:flex;background:#1a1f2e;border-bottom:1px solid rgba(255,255,255,.08);overflow-x:auto}
+.admin-tab{flex:1;min-width:55px;padding:12px 4px;border:none;background:transparent;color:#8892a0;font-size:10px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit;white-space:nowrap;touch-action:manipulation}
+.admin-tab.active{color:#4f8ef7;border-bottom-color:#4f8ef7}
+.admin-body{padding:16px;flex:1;overflow-y:auto}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.section-title{font-size:11px;font-weight:700;color:#8892a0;text-transform:uppercase;letter-spacing:.8px;margin:18px 0 10px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.stat-card{background:#1a1f2e;border-radius:14px;padding:15px;border:1px solid rgba(255,255,255,.08)}
+.stat-num{font-size:28px;font-weight:700;color:#fff}
+.stat-label{font-size:12px;color:#8892a0;margin-top:2px}
+.stat-num.green{color:#4ade80}.stat-num.orange{color:#fb923c}.stat-num.red{color:#f87171}.stat-num.blue{color:#4f8ef7}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8892a0;font-size:12px;cursor:pointer;transition:all .2s;font-family:inherit;font-weight:500;touch-action:manipulation}
+.filter-btn.active{background:#4f8ef7;border-color:#4f8ef7;color:#fff}
+.search-input{width:100%;padding:11px 14px;background:#1a1f2e;border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#e8eaf0;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px}
+.log-item{background:#1a1f2e;border-radius:13px;padding:14px 16px;margin-bottom:9px;border:1px solid rgba(255,255,255,.06)}
+.log-item.warn{border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.05)}
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.log-name{font-size:14px;font-weight:600;color:#fff}
+.log-rows{display:flex;flex-direction:column;gap:5px}
+.log-row{display:flex;justify-content:space-between;align-items:center}
+.log-lbl{font-size:12px;color:#8892a0}
+.log-val{font-size:12px;font-weight:500;color:#e8eaf0}
+.log-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.log-action-btn{flex:1;min-width:80px;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;touch-action:manipulation}
+.btn-edit{background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.2)}
+.btn-delete{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.empty{text-align:center;padding:48px 20px;color:#8892a0;font-size:14px}
+.settings-card{background:#1a1f2e;border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.settings-card h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:14px}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.set-row:last-of-type{border:none}
+.set-label{font-size:13px;color:#8892a0}
+.set-input{background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#e8eaf0;padding:8px 11px;font-size:13px;width:130px;outline:none;font-family:inherit}
+.save-btn{width:100%;padding:13px;border-radius:11px;border:none;background:#4f8ef7;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;font-family:inherit;touch-action:manipulation}
+.save-btn.danger{background:#f87171}
+.save-btn.green{background:#22c55e}
+.save-btn.gray{background:rgba(79,142,247,.15);color:#4f8ef7}
+.prs-add-row{display:flex;gap:8px;margin-bottom:12px}
+.prs-add-input{flex:1;padding:12px 14px;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#e8eaf0;font-size:14px;outline:none;font-family:inherit}
+.prs-add-btn{padding:12px 16px;border-radius:11px;border:none;background:#4f8ef7;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.prs-item{background:#0f1117;border-radius:11px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.06)}
+.prs-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.prs-name{font-size:14px;font-weight:500;color:#e8eaf0;flex:1}
+.prs-del{width:32px;height:32px;border-radius:8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;touch-action:manipulation}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:5px}
+.rpt-card{background:#1a1f2e;border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+.rpt-card h3{font-size:13px;font-weight:600;color:#fff;margin-bottom:12px}
+.rpt-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rpt-label{font-size:12px;color:#8892a0;width:65px;flex-shrink:0}
+.rpt-select,.rpt-date{flex:1;padding:9px 12px;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#e8eaf0;font-size:13px;outline:none;font-family:inherit}
+.rpt-btn-row{display:flex;gap:8px;margin-top:4px}
+.rpt-btn{flex:1;padding:11px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.rpt-run{background:#4f8ef7;color:#fff}
+.rpt-csv{background:#22c55e;color:#fff}
+.rpt-summary{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.rpt-stat{background:#1a1f2e;border-radius:11px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,.07)}
+.rpt-stat-num{font-size:18px;font-weight:700;color:#4f8ef7}
+.rpt-stat-num.green{color:#4ade80}
+.rpt-stat-num.orange{color:#fb923c}
+.rpt-stat-num.red{color:#f87171}
+.rpt-stat-label{font-size:10px;color:#8892a0;margin-top:2px}
+/* HOURS TABLE */
+.hours-table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.hours-table th{font-size:11px;color:#8892a0;padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);background:#1a1f2e}
+.hours-table td{font-size:13px;color:#e8eaf0;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.hours-table tr:last-child td{border:none}
+.hours-table .warn-cell{color:#facc15}
+.hours-table .ok-cell{color:#4ade80}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#1a1f2e;border-radius:18px;padding:24px;width:100%;max-width:340px;border:1px solid rgba(255,255,255,.1)}
+.modal h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:16px}
+.modal-field{margin-bottom:12px}
+.modal-field label{font-size:11px;color:#8892a0;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.modal-input{width:100%;padding:11px 13px;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#e8eaf0;font-size:14px;outline:none;font-family:inherit}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btn{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.modal-save{background:#4f8ef7;color:#fff}
+.modal-cancel{background:rgba(255,255,255,.08);color:#e8eaf0}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1f2e;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 22px;font-size:13px;font-weight:600;color:#e8eaf0;z-index:999;display:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+.loading-overlay{position:fixed;inset:0;background:rgba(15,17,23,.85);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:16px}
+.loading-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(79,142,247,.2);border-top-color:#4f8ef7;border-radius:50%;animation:spin .8s linear infinite}
+.loading-txt{font-size:13px;color:#8892a0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-txt">Yükleniyor...</div></div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Kaydı Düzenle</h3>
+    <input type="hidden" id="editId"/>
+    <div class="modal-field"><label>Personel</label><select class="modal-input" id="editStaff"></select></div>
+    <div class="modal-field"><label>Tür</label>
+      <select class="modal-input" id="editType"><option value="in">Giriş</option><option value="out">Çıkış</option></select>
+    </div>
+    <div class="modal-field"><label>Tarih</label><input type="date" class="modal-input" id="editDate"/></div>
+    <div class="modal-field"><label>Saat (örn: 11:30)</label><input type="text" class="modal-input" id="editTime" placeholder="11:30" maxlength="5"/></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-cancel" onclick="closeModal()">İptal</button>
+      <button class="modal-btn modal-save" onclick="saveEdit()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div>
+    <div class="logo-icon">🏢</div>
+    <div class="logo-title">Personel Takip</div>
+    <div class="logo-sub">Ria Lounge Cafe</div>
+  </div>
+  <button class="home-btn btn-personnel" onclick="showScreen('personnel')"><i class="ti ti-fingerprint"></i> Personel Girişi</button>
+  <button class="home-btn btn-admin" onclick="showScreen('adminlogin')"><i class="ti ti-shield-lock"></i> Yönetici Paneli</button>
+</div>
+
+<!-- PERSONNEL -->
+<div id="personnel" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('home')"><i class="ti ti-arrow-left"></i></button>
+    <div><div class="topbar-title">Personel Paneli</div><div class="topbar-sub">Giriş / Çıkış Kayıt</div></div>
+  </div>
+  <div class="personnel-body">
+    <div>
+      <span class="sec-label">Personel Seçin</span>
+      <div class="staff-select-box" id="staffSelectBox">
+        <input type="text" class="staff-search" id="staffSearch" placeholder="İsim ara..." oninput="filterStaffList()"/>
+        <div class="staff-list" id="staffList"><div class="staff-empty">Yükleniyor...</div></div>
+      </div>
+      <div class="selected-badge" id="selectedBadge">
+        <div class="staff-avatar" id="selAvatar">?</div>
+        <span class="selected-name" id="selName">—</span>
+        <button class="sel-clear" onclick="clearSelection()"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+    <div class="location-card">
+      <div class="location-row">
+        <div class="loc-icon"><i class="ti ti-map-pin"></i></div>
+        <div class="loc-text">
+          <div class="loc-label">Konum Durumu</div>
+          <div class="loc-status loc-wait" id="locStatus">Konum alınıyor...</div>
+        </div>
+        <button class="refresh-btn" onclick="getLocation()"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+    <div id="msgBox" class="msg-box"></div>
+    <div class="status-card">
+      <div class="status-row"><span class="status-label">Durum</span><span class="badge badge-none" id="currentBadge">—</span></div>
+      <div class="status-row"><span class="status-label">Son Giriş</span><span class="status-val" id="lastIn">—</span></div>
+      <div class="status-row"><span class="status-label">Son Çıkış</span><span class="status-val" id="lastOut">—</span></div>
+    </div>
+    <button class="check-btn check-in" id="checkInBtn" onclick="recordAttendance('in')" disabled><i class="ti ti-login"></i> Giriş Yap</button>
+    <button class="check-btn check-out" id="checkOutBtn" onclick="recordAttendance('out')" disabled><i class="ti ti-logout"></i> Çıkış Yap</button>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminlogin" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('home')"><i class="ti ti-arrow-left"></i></button>
+    <div><div class="topbar-title">Yönetici Girişi</div></div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div class="login-card">
+      <h2>🔐 Yönetici Paneli</h2>
+      <p>Şifreyi giriniz</p>
+      <input class="login-input" type="password" id="adminPass" placeholder="Şifre..." onkeydown="if(event.key==='Enter')adminLogin()"/>
+      <button class="login-btn" onclick="adminLogin()">Giriş Yap</button>
+      <div class="login-err" id="loginErr">❌ Hatalı şifre!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('home')"><i class="ti ti-arrow-left"></i></button>
+    <div><div class="topbar-title">Yönetici Paneli</div><div class="topbar-sub">Ria Lounge Cafe</div></div>
+  </div>
+  <div class="admin-tab-row">
+    <button class="admin-tab active" onclick="switchTab('logs',this)">📋 Kayıtlar</button>
+    <button class="admin-tab" onclick="switchTab('hours',this)">⏱️ Saatler</button>
+    <button class="admin-tab" onclick="switchTab('report',this)">📊 Rapor</button>
+    <button class="admin-tab" onclick="switchTab('personnel',this)">👥 Personel</button>
+    <button class="admin-tab" onclick="switchTab('stats',this)">📈 Özet</button>
+    <button class="admin-tab" onclick="switchTab('settings',this)">⚙️ Ayarlar</button>
+  </div>
+  <div class="admin-body">
+
+    <!-- LOGS -->
+    <div id="tab-logs" class="tab-content active">
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterLogs('all',this)">Tümü</button>
+        <button class="filter-btn" onclick="filterLogs('in',this)">Girişler</button>
+        <button class="filter-btn" onclick="filterLogs('out',this)">Çıkışlar</button>
+        <button class="filter-btn" onclick="filterLogs('today',this)">Bugün</button>
+        <button class="filter-btn" onclick="filterLogs('incomplete',this)">⚠️ Eksik</button>
+      </div>
+      <input type="text" class="search-input" id="logSearch" placeholder="🔍 İsme göre ara..." oninput="renderLogs()"/>
+      <div id="logsList"></div>
+    </div>
+
+    <!-- HOURS -->
+    <div id="tab-hours" class="tab-content">
+      <div class="rpt-card">
+        <h3>⏱️ Çalışma Saati Raporu</h3>
+        <div class="rpt-row"><span class="rpt-label">Personel</span><select class="rpt-select" id="hoursStaff"><option value="">Tümü</option></select></div>
+        <div class="rpt-row"><span class="rpt-label">Periyot</span>
+          <select class="rpt-select" id="hoursPeriod">
+            <option value="today">Bugün</option>
+            <option value="week">Bu Hafta</option>
+            <option value="month" selected>Bu Ay</option>
+            <option value="custom">Özel Tarih</option>
+          </select>
+        </div>
+        <div id="hoursCustomRange" style="display:none">
+          <div class="rpt-row"><span class="rpt-label">Başlangıç</span><input type="date" class="rpt-date" id="hoursFrom"/></div>
+          <div class="rpt-row"><span class="rpt-label">Bitiş</span><input type="date" class="rpt-date" id="hoursTo"/></div>
+        </div>
+        <div class="rpt-btn-row">
+          <button class="rpt-btn rpt-run" onclick="runHours()">🔍 Hesapla</button>
+          <button class="rpt-btn rpt-csv" onclick="exportHoursCSV()">⬇️ CSV</button>
+          <button class="rpt-btn" style="background:#1D6F42;color:#fff" onclick="exportHoursExcel()">📊 Excel</button>
+        </div>
+      </div>
+      <div id="hoursList"></div>
+    </div>
+
+    <!-- REPORT -->
+    <div id="tab-report" class="tab-content">
+      <div class="rpt-card">
+        <h3>🔍 Rapor Filtresi</h3>
+        <div class="rpt-row"><span class="rpt-label">Personel</span><select class="rpt-select" id="rptStaff"><option value="">Tümü</option></select></div>
+        <div class="rpt-row"><span class="rpt-label">Tür</span>
+          <select class="rpt-select" id="rptType"><option value="">Tümü</option><option value="in">Giriş</option><option value="out">Çıkış</option></select>
+        </div>
+        <div class="rpt-row"><span class="rpt-label">Başlangıç</span><input type="date" class="rpt-date" id="rptFrom"/></div>
+        <div class="rpt-row"><span class="rpt-label">Bitiş</span><input type="date" class="rpt-date" id="rptTo"/></div>
+        <div class="rpt-btn-row">
+          <button class="rpt-btn rpt-run" onclick="runReport()">🔍 Göster</button>
+          <button class="rpt-btn rpt-csv" onclick="exportCSV()">⬇️ CSV</button>
+          <button class="rpt-btn" style="background:#1D6F42;color:#fff" onclick="exportExcel()">📊 Excel</button>
+        </div>
+      </div>
+      <div class="rpt-summary" id="rptSummary" style="display:none">
+        <div class="rpt-stat"><div class="rpt-stat-num" id="rptTotal">0</div><div class="rpt-stat-label">Toplam</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-num green" id="rptIn">0</div><div class="rpt-stat-label">Giriş</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-num orange" id="rptOut">0</div><div class="rpt-stat-label">Çıkış</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-num red" id="rptIncomplete">0</div><div class="rpt-stat-label">⚠️ Eksik</div></div>
+      </div>
+      <div id="reportList"></div>
+    </div>
+
+    <!-- PERSONNEL -->
+    <div id="tab-personnel" class="tab-content">
+      <div class="section-title">CSV İçe Aktar</div>
+      <div class="settings-card" style="margin-bottom:14px">
+        <h3>📥 CSV İçe Aktar</h3>
+        <p style="font-size:12px;color:#8892a0;margin-bottom:12px">Daha önce indirilen rapor CSV dosyasını yükleyin.</p>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="importCSV(this)"/>
+        <button class="save-btn green" onclick="document.getElementById('csvFileInput').click()">📥 CSV Dosyası Seç ve Yükle</button>
+        <div id="importResult" style="margin-top:10px;font-size:13px;color:#8892a0;display:none"></div>
+      </div>
+      <div class="section-title">Personel Listesi</div>
+      <div class="prs-add-row">
+        <input type="text" class="prs-add-input" id="newStaffName" placeholder="Ad Soyad..." onkeydown="if(event.key==='Enter')addStaff()"/>
+        <button class="prs-add-btn" onclick="addStaff()"><i class="ti ti-plus"></i> Ekle</button>
+      </div>
+      <div id="staffMgmtList"></div>
+    </div>
+
+    <!-- STATS -->
+    <div id="tab-stats" class="tab-content">
+      <div class="section-title">Bugünkü Özet</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num green" id="statInToday">0</div><div class="stat-label">Giriş</div></div>
+        <div class="stat-card"><div class="stat-num orange" id="statOutToday">0</div><div class="stat-label">Çıkış</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num blue" id="statHoursToday">0s</div><div class="stat-label">Toplam Çalışma</div></div>
+        <div class="stat-card"><div class="stat-num red" id="statIncompleteToday">0</div><div class="stat-label">⚠️ Eksik Kayıt</div></div>
+      </div>
+      <div class="section-title">Şu An İşyerinde</div>
+      <div id="activeList"></div>
+      <div class="section-title">⚠️ Eksik Kayıt (Çıkış Yapmayan)</div>
+      <div id="incompleteList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <div class="settings-card">
+        <h3>📍 Konum Ayarları</h3>
+        <div class="set-row"><span class="set-label">Enlem</span><input class="set-input" type="number" step="0.00001" id="setLat" placeholder="35.3074500"/></div>
+        <div class="set-row"><span class="set-label">Boylam</span><input class="set-input" type="number" step="0.00001" id="setLng" placeholder="33.9416588"/></div>
+        <div class="set-row"><span class="set-label">Maks. Mesafe</span>
+          <div style="display:flex;align-items:center;gap:6px"><input class="set-input" type="number" id="setRadius" style="width:80px"/><span style="color:#8892a0;font-size:13px">m</span></div>
+        </div>
+        <button class="save-btn" onclick="saveLocSettings()">💾 Kaydet</button>
+        <button class="save-btn gray" style="margin-top:8px" onclick="useMyLocation()">📍 Mevcut Konumumu Kullan</button>
+      </div>
+      <div class="settings-card">
+        <h3>🔐 Şifre Değiştir</h3>
+        <div class="set-row"><span class="set-label">Yeni Şifre</span><input class="set-input" type="password" id="newPass" placeholder="Yeni şifre..."/></div>
+        <div class="set-row"><span class="set-label">Tekrar</span><input class="set-input" type="password" id="newPass2" placeholder="Tekrar..."/></div>
+        <button class="save-btn" onclick="changePassword()">🔑 Güncelle</button>
+      </div>
+      <div class="settings-card">
+        <h3>🗑️ Veri Yönetimi</h3>
+        <button class="save-btn danger" onclick="clearAllLogs()">Tüm Kayıtları Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+var SB_URL = 'https://xjjcsahzgmvrbpookihu.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqamNzYWh6Z212cmJwb29raWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MTkyOTcsImV4cCI6MjA5NTA5NTI5N30.0Z0776mtZCPUnoMSmdUBHjRCmoZIvM0qRJQp48j5hzI';
+
+// ── SAAT: Her saati olduğu gibi göster ─────────────────
+function fmtTime(ts) {
+  var d = new Date(ts);
+  return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
+}
+function fmtDate(ts) {
+  var d = new Date(ts);
+  return pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth()+1) + '/' + d.getUTCFullYear();
+}
+function fmtDT(ts) { return fmtDate(ts) + ' ' + fmtTime(ts); }
+function todayLocalStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+function localDateForInput(ts) {
+  var d = new Date(ts);
+  return d.getUTCFullYear() + '-' + pad(d.getUTCMonth()+1) + '-' + pad(d.getUTCDate());
+}
+function localTimeForInput(ts) {
+  var d = new Date(ts);
+  return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
+}
+
+// ── SUPABASE ────────────────────────────────────────────
+function sbFetch(path, method, body) {
+  var h = {
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type': 'application/json'
+  };
+  if (method === 'POST' || method === 'PATCH') h['Prefer'] = 'return=representation';
+  return fetch(SB_URL + '/rest/v1/' + path, {
+    method: method || 'GET',
+    headers: h,
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function(r) {
+    if (!r.ok && r.status !== 204) {
+      return r.json().then(function(e){ throw new Error(JSON.stringify(e)); });
+    }
+    return r.status === 204 ? null : r.json();
+  });
+}
+
+// ── STATE ───────────────────────────────────────────────
+var ADMIN_PASS = localStorage.getItem('adminPass') || 'admin123';
+var WORK_LAT = null, WORK_LNG = null, WORK_RADIUS = 100;
+var staffList = [], logs = [];
+var rejected = parseInt(localStorage.getItem('rejectedCount') || '0');
+var currentLat = null, currentLng = null, locationOk = false;
+var selectedStaff = null, currentFilter = 'all';
+var reportResults = [], hoursResults = [];
+
+// ── DB ──────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    var d = await sbFetch('settings?select=key,value');
+    if (!Array.isArray(d)) return;
+    d.forEach(function(r) {
+      if (r.key === 'work_lat')    WORK_LAT    = parseFloat(r.value);
+      if (r.key === 'work_lng')    WORK_LNG    = parseFloat(r.value);
+      if (r.key === 'work_radius') WORK_RADIUS = parseInt(r.value);
+      if (r.key === 'admin_pass')  { ADMIN_PASS = r.value; localStorage.setItem('adminPass', r.value); }
+    });
+  } catch(e) { console.error('loadSettings:', e); }
+}
+
+async function saveSetting(key, val) {
+  try {
+    await sbFetch('settings?key=eq.' + key, 'DELETE');
+    await sbFetch('settings', 'POST', { key: key, value: String(val) });
+  } catch(e) { console.error('saveSetting:', e); }
+}
+
+async function loadStaff() {
+  try {
+    var d = await sbFetch('staff?select=name&order=name.asc');
+    if (Array.isArray(d)) staffList = d.map(function(r) { return r.name; });
+  } catch(e) { console.error('loadStaff:', e); }
+}
+
+async function loadLogs() {
+  try {
+    var d = await sbFetch('attendance?select=*&order=timestamp.desc&limit=1000');
+    if (Array.isArray(d)) logs = d;
+  } catch(e) { console.error('loadLogs:', e); }
+}
+
+// ── NAV ─────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (id === 'personnel') { resetPersonnelUI(); getLocation(); }
+  if (id === 'admin')     { loadAdminData(); }
+}
+
+// ── PERSONNEL ───────────────────────────────────────────
+function resetPersonnelUI() {
+  selectedStaff = null;
+  document.getElementById('staffSearch').value = '';
+  document.getElementById('selectedBadge').style.display = 'none';
+  document.getElementById('staffSelectBox').style.display = 'block';
+  setLS('Konum alınıyor...', 'wait');
+  setBadge('—', 'none');
+  document.getElementById('lastIn').textContent = '—';
+  document.getElementById('lastOut').textContent = '—';
+  setButtons(false); hideMsg();
+  currentLat = null; currentLng = null; locationOk = false;
+  renderStaffPick('');
+}
+
+function renderStaffPick(q) {
+  var el = document.getElementById('staffList');
+  var list = staffList.filter(function(s) { return s.toLowerCase().indexOf(q.toLowerCase()) >= 0; });
+  if (!list.length) {
+    el.innerHTML = '<div class="staff-empty">' + (staffList.length === 0 ? 'Yönetici panelinden personel ekleyin.' : 'Eşleşen personel yok.') + '</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(s) {
+    var sel = selectedStaff === s;
+    return '<div class="staff-item' + (sel ? ' selected' : '') + '" onclick="pickStaff(\'' + ej(s) + '\')" ontouchend="event.preventDefault();pickStaff(\'' + ej(s) + '\')">' +
+      '<div class="staff-avatar">' + s.charAt(0).toUpperCase() + '</div>' +
+      '<span class="staff-item-name">' + eh(s) + '</span>' +
+      (sel ? '<i class="ti ti-check" style="color:#4f8ef7;font-size:16px"></i>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function filterStaffList() { renderStaffPick(document.getElementById('staffSearch').value); }
+
+function pickStaff(name) {
+  selectedStaff = name;
+  document.getElementById('selectedBadge').style.display = 'flex';
+  document.getElementById('staffSelectBox').style.display = 'none';
+  document.getElementById('selAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('selName').textContent = name;
+  updateStatus(name);
+  updateBtns();
+}
+
+function clearSelection() {
+  selectedStaff = null;
+  document.getElementById('selectedBadge').style.display = 'none';
+  document.getElementById('staffSelectBox').style.display = 'block';
+  document.getElementById('staffSearch').value = '';
+  setBadge('—', 'none');
+  document.getElementById('lastIn').textContent = '—';
+  document.getElementById('lastOut').textContent = '—';
+  renderStaffPick('');
+  updateBtns();
+}
+
+function setLS(t, c) { var e = document.getElementById('locStatus'); e.textContent = t; e.className = 'loc-status loc-' + c; }
+function setBadge(t, c) { var e = document.getElementById('currentBadge'); e.textContent = t; e.className = 'badge badge-' + c; }
+function setButtons(v) { document.getElementById('checkInBtn').disabled = !v; document.getElementById('checkOutBtn').disabled = !v; }
+function updateBtns() { setButtons(locationOk && selectedStaff !== null); }
+
+function getLocation() {
+  setLS('Konum alınıyor...', 'wait'); locationOk = false; updateBtns();
+  if (!navigator.geolocation) { setLS('Konum desteklenmiyor', 'err'); return; }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      currentLat = pos.coords.latitude; currentLng = pos.coords.longitude;
+      if (WORK_LAT === null || WORK_LNG === null) {
+        setLS('✅ Konum alındı', 'ok'); locationOk = true;
+      } else {
+        var d = dist(currentLat, currentLng, WORK_LAT, WORK_LNG);
+        if (d <= WORK_RADIUS) { setLS('✅ İş yerinde (' + Math.round(d) + 'm)', 'ok'); locationOk = true; }
+        else { setLS('❌ İş yerinde değilsiniz (' + Math.round(d) + 'm uzakta)', 'err'); locationOk = false; rejected++; localStorage.setItem('rejectedCount', rejected); }
+      }
+      updateBtns();
+    },
+    function() { setLS('❌ Konum alınamadı — Lütfen izin verin', 'err'); locationOk = false; updateBtns(); },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+function dist(la1, ln1, la2, ln2) {
+  var R = 6371000, dL = (la2-la1)*Math.PI/180, dN = (ln2-ln1)*Math.PI/180;
+  var a = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updateStatus(name) {
+  var ml = logs.filter(function(l) { return l.staff_name === name; });
+  var li = ml.filter(function(l) { return l.type === 'in'; })[0];
+  var lo = ml.filter(function(l) { return l.type === 'out'; })[0];
+  document.getElementById('lastIn').textContent  = li ? fmtDT(li.timestamp) : '—';
+  document.getElementById('lastOut').textContent = lo ? fmtDT(lo.timestamp) : '—';
+  var isIn = li && (!lo || new Date(li.timestamp) > new Date(lo.timestamp));
+  if (isIn) setBadge('İçeride', 'in');
+  else if (lo) setBadge('Dışarıda', 'out');
+  else setBadge('Kayıt Yok', 'none');
+}
+
+async function recordAttendance(type) {
+  if (!selectedStaff) { showMsg('Lütfen personel seçiniz!', 'error'); return; }
+  if (!locationOk) { showMsg('Konum doğrulaması başarısız!', 'error'); return; }
+  showLoad(true);
+  try {
+    // Store local time as UTC to avoid any browser timezone conversion
+    var now = new Date();
+    var localTs = new Date(Date.UTC(
+      now.getFullYear(), now.getMonth(), now.getDate(),
+      now.getHours(), now.getMinutes(), now.getSeconds()
+    )).toISOString();
+    await sbFetch('attendance', 'POST', {
+      staff_name: selectedStaff,
+      type: type,
+      lat: currentLat,
+      lng: currentLng,
+      timestamp: localTs
+    });
+    await loadLogs();
+    updateStatus(selectedStaff);
+    showMsg(type === 'in' ? '✅ Giriş kaydedildi!' : '✅ Çıkış kaydedildi!', 'success');
+  } catch(e) {
+    console.error('recordAttendance error:', e);
+    showMsg('❌ Bağlantı hatası! Tekrar deneyin.', 'error');
+  }
+  showLoad(false);
+}
+
+function showMsg(t, c) { var e = document.getElementById('msgBox'); e.textContent = t; e.className = 'msg-box msg-' + c; e.style.display = 'block'; setTimeout(function() { e.style.display = 'none'; }, 4000); }
+function hideMsg() { document.getElementById('msgBox').style.display = 'none'; }
+function showLoad(v) { document.getElementById('loadingOverlay').classList.toggle('show', v); }
+
+// ── ADMIN ───────────────────────────────────────────────
+function adminLogin() {
+  var p = document.getElementById('adminPass').value;
+  if (p === ADMIN_PASS) { document.getElementById('loginErr').style.display = 'none'; document.getElementById('adminPass').value = ''; showScreen('admin'); }
+  else { document.getElementById('loginErr').style.display = 'block'; }
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.admin-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'stats')     loadStats();
+  if (name === 'personnel') renderStaffMgmt();
+  if (name === 'settings')  loadSettingsUI();
+  if (name === 'report')    initReport();
+  if (name === 'hours')     initHours();
+}
+
+// ── HOURS CALCULATION ───────────────────────────────────
+function calcHoursForLogs(filteredLogs) {
+  // Group by staff and day, pair in/out
+  var byStaff = {};
+  filteredLogs.forEach(function(l) {
+    if (!byStaff[l.staff_name]) byStaff[l.staff_name] = [];
+    byStaff[l.staff_name].push(l);
+  });
+
+  var results = [];
+  Object.keys(byStaff).sort().forEach(function(name) {
+    var entries = byStaff[name].slice().sort(function(a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
+    var totalMs = 0;
+    var sessions = [];
+    var incomplete = false;
+    var i = 0;
+    while (i < entries.length) {
+      if (entries[i].type === 'in') {
+        var inTime = new Date(entries[i].timestamp);
+        // find next out
+        var j = i + 1;
+        while (j < entries.length && entries[j].type !== 'out') j++;
+        if (j < entries.length) {
+          var outTime = new Date(entries[j].timestamp);
+          var ms = outTime - inTime;
+          if (ms > 0) { totalMs += ms; sessions.push({ in: entries[i].timestamp, out: entries[j].timestamp, ms: ms }); }
+          i = j + 1;
+        } else {
+          // No out found - incomplete
+          incomplete = true;
+          sessions.push({ in: entries[i].timestamp, out: null, ms: 0 });
+          i++;
+        }
+      } else {
+        i++;
+      }
+    }
+    results.push({ name: name, totalMs: totalMs, sessions: sessions, incomplete: incomplete });
+  });
+  return results;
+}
+
+function msToHM(ms) {
+  var h = Math.floor(ms / 3600000);
+  var m = Math.floor((ms % 3600000) / 60000);
+  return h + 's ' + pad(m) + 'dk';
+}
+
+function initHours() {
+  var sel = document.getElementById('hoursStaff');
+  sel.innerHTML = '<option value="">Tümü</option>' + staffList.map(function(s) { return '<option value="' + eh(s) + '">' + eh(s) + '</option>'; }).join('');
+  document.getElementById('hoursPeriod').onchange = function() {
+    document.getElementById('hoursCustomRange').style.display = this.value === 'custom' ? 'block' : 'none';
+  };
+}
+
+function getDateRange(period) {
+  var now = toLocal(new Date().toISOString());
+  var y = now.getUTCFullYear(), m = now.getUTCMonth(), d = now.getUTCDate();
+  var from, to;
+  if (period === 'today') {
+    from = new Date(Date.UTC(y, m, d) - TZ);
+    to   = new Date(Date.UTC(y, m, d, 23, 59, 59) - TZ);
+  } else if (period === 'week') {
+    var day = now.getUTCDay() || 7;
+    from = new Date(Date.UTC(y, m, d - day + 1) - TZ);
+    to   = new Date(Date.UTC(y, m, d, 23, 59, 59) - TZ);
+  } else if (period === 'month') {
+    from = new Date(Date.UTC(y, m, 1) - TZ);
+    to   = new Date(Date.UTC(y, m, d, 23, 59, 59) - TZ);
+  } else {
+    var f = document.getElementById('hoursFrom').value;
+    var t = document.getElementById('hoursTo').value;
+    from = f ? new Date(new Date(f + 'T00:00:00').getTime() - TZ) : null;
+    to   = t ? new Date(new Date(t + 'T23:59:59').getTime() - TZ) : null;
+  }
+  return { from: from, to: to };
+}
+
+function runHours() {
+  var staff  = document.getElementById('hoursStaff').value;
+  var period = document.getElementById('hoursPeriod').value;
+  var range  = getDateRange(period);
+
+  var filtered = logs.filter(function(l) {
+    if (staff && l.staff_name !== staff) return false;
+    var ts = new Date(l.timestamp);
+    if (range.from && ts < range.from) return false;
+    if (range.to   && ts > range.to)   return false;
+    return true;
+  });
+
+  hoursResults = calcHoursForLogs(filtered);
+  var el = document.getElementById('hoursList');
+
+  if (!hoursResults.length) { el.innerHTML = '<div class="empty">Bu periyotta kayıt bulunamadı</div>'; return; }
+
+  var totalAll = hoursResults.reduce(function(s, r) { return s + r.totalMs; }, 0);
+
+  var html = '<div class="settings-card" style="margin-bottom:14px">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  html += '<span style="font-size:13px;color:#8892a0">Toplam Çalışma</span>';
+  html += '<span style="font-size:18px;font-weight:700;color:#4f8ef7">' + msToHM(totalAll) + '</span></div>';
+  html += '<table class="hours-table"><tr><th>Personel</th><th>Süre</th><th>Seans</th><th>Durum</th></tr>';
+
+  hoursResults.forEach(function(r) {
+    html += '<tr>';
+    html += '<td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:11px">' + r.name.charAt(0).toUpperCase() + '</div>' + eh(r.name) + '</div></td>';
+    html += '<td class="' + (r.totalMs > 0 ? 'ok-cell' : '') + '">' + (r.totalMs > 0 ? msToHM(r.totalMs) : '—') + '</td>';
+    html += '<td>' + r.sessions.length + '</td>';
+    html += '<td class="' + (r.incomplete ? 'warn-cell' : 'ok-cell') + '">' + (r.incomplete ? '⚠️ Eksik' : '✅') + '</td>';
+    html += '</tr>';
+  });
+  html += '</table></div>';
+
+  // Detail per person
+  hoursResults.forEach(function(r) {
+    html += '<div class="log-item' + (r.incomplete ? ' warn' : '') + '">';
+    html += '<div class="log-header"><div style="display:flex;align-items:center;gap:9px"><div class="avatar">' + r.name.charAt(0).toUpperCase() + '</div><span class="log-name">' + eh(r.name) + '</span></div>';
+    html += '<span style="font-size:14px;font-weight:700;color:#4f8ef7">' + msToHM(r.totalMs) + '</span></div>';
+    r.sessions.forEach(function(s, i) {
+      html += '<div class="log-row" style="margin-bottom:4px">';
+      html += '<span class="log-lbl">Seans ' + (i+1) + '</span>';
+      if (s.out) {
+        html += '<span class="log-val" style="color:#4ade80">' + fmtTime(s.in) + ' → ' + fmtTime(s.out) + ' (' + msToHM(s.ms) + ')</span>';
+      } else {
+        html += '<span class="log-val" style="color:#facc15">' + fmtTime(s.in) + ' → ⚠️ Çıkış yok</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+function exportHoursCSV() {
+  if (!hoursResults.length) { runHours(); }
+  if (!hoursResults.length) { toast('❌ Önce hesapla!'); return; }
+  var rows = [['Ad Soyad', 'Toplam Süre (dk)', 'Seans Sayısı', 'Durum']];
+  hoursResults.forEach(function(r) {
+    rows.push([r.name, Math.floor(r.totalMs/60000), r.sessions.length, r.incomplete ? 'Eksik Kayıt' : 'Tam']);
+  });
+  downloadCSV(rows, 'saatler_' + todayLocalStr());
+}
+
+// ── LOGS ────────────────────────────────────────────────
+function filterLogs(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderLogs();
+}
+
+function isIncomplete(log) {
+  // Check if this 'in' log has no corresponding 'out' after it
+  if (log.type !== 'in') return false;
+  var ml = logs.filter(function(l) { return l.staff_name === log.staff_name; });
+  var hasOut = ml.some(function(l) { return l.type === 'out' && new Date(l.timestamp) > new Date(log.timestamp); });
+  return !hasOut;
+}
+
+function renderLogs() {
+  var el = document.getElementById('logsList');
+  var q = (document.getElementById('logSearch') || {}).value || '';
+  var today = todayLocalStr().split('-').reverse().join('/');
+
+  var list = logs.filter(function(l) {
+    if (currentFilter === 'in')         return l.type === 'in';
+    if (currentFilter === 'out')        return l.type === 'out';
+    if (currentFilter === 'today')      return fmtDate(l.timestamp) === today;
+    if (currentFilter === 'incomplete') return isIncomplete(l);
+    return true;
+  }).filter(function(l) {
+    return !q || l.staff_name.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+  });
+
+  if (!list.length) { el.innerHTML = '<div class="empty"><i class="ti ti-clipboard-x" style="font-size:36px;display:block;margin-bottom:10px"></i>Kayıt bulunamadı</div>'; return; }
+
+  el.innerHTML = list.map(function(l) {
+    var tl = l.type === 'in' ? 'Giriş' : 'Çıkış';
+    var bc = l.type === 'in' ? 'badge-in' : 'badge-out';
+    var inc = isIncomplete(l);
+    return '<div class="log-item' + (inc ? ' warn' : '') + '">' +
+      '<div class="log-header"><div style="display:flex;align-items:center;gap:9px"><div class="avatar">' + l.staff_name.charAt(0).toUpperCase() + '</div><span class="log-name">' + eh(l.staff_name) + '</span></div>' +
+      '<span class="badge ' + bc + '">' + tl + (inc ? ' ⚠️' : '') + '</span></div>' +
+      '<div class="log-rows">' +
+        '<div class="log-row"><span class="log-lbl">📅 Tarih</span><span class="log-val">' + fmtDate(l.timestamp) + '</span></div>' +
+        '<div class="log-row"><span class="log-lbl">🕐 Saat</span><span class="log-val">' + fmtTime(l.timestamp) + '</span></div>' +
+        (l.lat ? '<div class="log-row"><span class="log-lbl">📍 Konum</span><span class="log-val" style="color:#4ade80">✓ Doğrulandı</span></div>' : '') +
+        (inc ? '<div class="log-row"><span class="log-lbl" style="color:#facc15">⚠️ Uyarı</span><span class="log-val" style="color:#facc15">Çıkış kaydı yok!</span></div>' : '') +
+      '</div>' +
+      '<div class="log-actions">' +
+        '<button class="log-action-btn btn-edit" onclick="openEdit(' + l.id + ')"><i class="ti ti-pencil"></i> Düzenle</button>' +
+        '<button class="log-action-btn btn-delete" onclick="deleteLog(' + l.id + ')"><i class="ti ti-trash"></i> Sil</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// ── EDIT ────────────────────────────────────────────────
+function openEdit(id) {
+  var l = logs.find(function(x) { return x.id === id; });
+  if (!l) return;
+  document.getElementById('editId').value = id;
+  var sel = document.getElementById('editStaff');
+  sel.innerHTML = staffList.map(function(s) { return '<option value="' + eh(s) + '"' + (s === l.staff_name ? ' selected' : '') + '>' + eh(s) + '</option>'; }).join('');
+  document.getElementById('editType').value = l.type;
+  // Show in local Cyprus time
+  document.getElementById('editDate').value = localDateForInput(l.timestamp);
+  document.getElementById('editTime').value = localTimeForInput(l.timestamp);
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+
+async function saveEdit() {
+  var id   = parseInt(document.getElementById('editId').value);
+  var name = document.getElementById('editStaff').value;
+  var type = document.getElementById('editType').value;
+  var date = document.getElementById('editDate').value; // YYYY-MM-DD
+  var time = document.getElementById('editTime').value; // HH:MM
+  if (!date || !time) { toast('❌ Tarih ve saat giriniz!'); return; }
+  
+  // date is YYYY-MM-DD from input[type=date]
+  // time is HH:MM from input[type=time] - this is Cyprus local time (UTC+3)
+  // Convert Cyprus time to UTC: subtract 3 hours
+  // Store exactly what user typed - no timezone conversion
+  var timeParts = time.replace(/\s/g,'').split(':');
+  var hh = parseInt(timeParts[0]);
+  var mm = parseInt(timeParts[1]) || 0;
+  if (isNaN(hh) || hh < 0 || hh > 23) { toast('❌ Geçerli saat giriniz! (örn: 11:30)'); return; }
+  var timeStr = pad(hh) + ':' + pad(mm);
+  // Store as UTC so it displays exactly as entered
+  var utcTs = new Date(Date.UTC(
+    parseInt(date.split('-')[0]),
+    parseInt(date.split('-')[1])-1,
+    parseInt(date.split('-')[2]),
+    hh, mm, 0
+  )).toISOString();
+  
+  showLoad(true); closeModal();
+  try {
+    await sbFetch('attendance?id=eq.' + id, 'PATCH', { staff_name: name, type: type, timestamp: utcTs });
+    await loadLogs(); renderLogs();
+    toast('✅ Kayıt güncellendi!');
+  } catch(e) { toast('❌ Hata oluştu!'); console.error(e); }
+  showLoad(false);
+}
+
+async function deleteLog(id) {
+  if (!confirm('Bu kayıt silinsin mi?')) return;
+  showLoad(true);
+  try { await sbFetch('attendance?id=eq.' + id, 'DELETE'); await loadLogs(); renderLogs(); toast('🗑️ Kayıt silindi.'); }
+  catch(e) { toast('❌ Hata oluştu!'); }
+  showLoad(false);
+}
+
+// ── REPORT ──────────────────────────────────────────────
+function initReport() {
+  var sel = document.getElementById('rptStaff');
+  sel.innerHTML = '<option value="">Tümü</option>' + staffList.map(function(s) { return '<option value="' + eh(s) + '">' + eh(s) + '</option>'; }).join('');
+  if (!document.getElementById('rptFrom').value) {
+    var now = toLocal(new Date().toISOString());
+    var y = now.getUTCFullYear(), m = pad(now.getUTCMonth()+1);
+    document.getElementById('rptFrom').value = y + '-' + m + '-01';
+    document.getElementById('rptTo').value   = y + '-' + m + '-' + pad(now.getUTCDate());
+  }
+}
+
+function runReport() {
+  var staff = document.getElementById('rptStaff').value;
+  var type  = document.getElementById('rptType').value;
+  var from  = document.getElementById('rptFrom').value;
+  var to    = document.getElementById('rptTo').value;
+  var fromUTC = from ? new Date(new Date(from + 'T00:00:00').getTime() - TZ) : null;
+  var toUTC   = to   ? new Date(new Date(to   + 'T23:59:59').getTime() - TZ) : null;
+
+  reportResults = logs.filter(function(l) {
+    if (staff && l.staff_name !== staff) return false;
+    if (type  && l.type !== type)        return false;
+    var ts = new Date(l.timestamp);
+    if (fromUTC && ts < fromUTC) return false;
+    if (toUTC   && ts > toUTC)   return false;
+    return true;
+  });
+
+  var incompleteCount = reportResults.filter(function(l) { return isIncomplete(l); }).length;
+  document.getElementById('rptSummary').style.display = 'grid';
+  document.getElementById('rptTotal').textContent      = reportResults.length;
+  document.getElementById('rptIn').textContent         = reportResults.filter(function(l) { return l.type === 'in'; }).length;
+  document.getElementById('rptOut').textContent        = reportResults.filter(function(l) { return l.type === 'out'; }).length;
+  document.getElementById('rptIncomplete').textContent = incompleteCount;
+
+  var el = document.getElementById('reportList');
+  if (!reportResults.length) { el.innerHTML = '<div class="empty">Seçilen kriterlere göre kayıt bulunamadı</div>'; return; }
+
+  // Also show hours summary
+  var hrs = calcHoursForLogs(reportResults);
+  var hrsHtml = '';
+  if (hrs.length) {
+    hrsHtml = '<div class="settings-card" style="margin-bottom:12px"><h3>⏱️ Çalışma Saatleri</h3>';
+    hrs.forEach(function(r) {
+      hrsHtml += '<div class="log-row" style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">';
+      hrsHtml += '<span class="log-lbl">' + eh(r.name) + '</span>';
+      hrsHtml += '<span class="log-val ' + (r.incomplete ? 'warn-cell' : 'ok-cell') + '">' + msToHM(r.totalMs) + (r.incomplete ? ' ⚠️' : '') + '</span>';
+      hrsHtml += '</div>';
+    });
+    hrsHtml += '</div>';
+  }
+
+  el.innerHTML = hrsHtml + reportResults.map(function(l) {
+    var tl = l.type === 'in' ? 'Giriş' : 'Çıkış', bc = l.type === 'in' ? 'badge-in' : 'badge-out';
+    var inc = isIncomplete(l);
+    return '<div class="log-item' + (inc ? ' warn' : '') + '">' +
+      '<div class="log-header"><div style="display:flex;align-items:center;gap:9px"><div class="avatar">' + l.staff_name.charAt(0).toUpperCase() + '</div><span class="log-name">' + eh(l.staff_name) + '</span></div><span class="badge ' + bc + '">' + tl + '</span></div>' +
+      '<div class="log-rows"><div class="log-row"><span class="log-lbl">📅 Tarih</span><span class="log-val">' + fmtDate(l.timestamp) + '</span></div><div class="log-row"><span class="log-lbl">🕐 Saat</span><span class="log-val">' + fmtTime(l.timestamp) + '</span></div>' +
+      (inc ? '<div class="log-row"><span class="log-lbl" style="color:#facc15">⚠️</span><span class="log-val" style="color:#facc15">Çıkış yok!</span></div>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+function exportCSV() {
+  runReport();
+  if (!reportResults.length) { toast('❌ Sonuç yok!'); return; }
+  var hrs = calcHoursForLogs(reportResults);
+  var hrsMap = {};
+  hrs.forEach(function(r) { hrsMap[r.name] = r; });
+
+  var rows = [['Ad Soyad', 'Tür', 'Tarih', 'Saat', 'Konum', 'Toplam Çalışma', 'Durum']];
+  reportResults.forEach(function(l) {
+    var hr = hrsMap[l.staff_name];
+    rows.push([
+      l.staff_name,
+      l.type === 'in' ? 'Giriş' : 'Çıkış',
+      fmtDate(l.timestamp),
+      fmtTime(l.timestamp),
+      l.lat ? 'Doğrulandı' : '—',
+      hr ? msToHM(hr.totalMs) : '—',
+      hr && hr.incomplete ? 'Eksik Kayıt ⚠️' : 'Tam ✅'
+    ]);
+  });
+  downloadCSV(rows, 'rapor_' + todayLocalStr());
+}
+
+function downloadCSV(rows, filename) {
+  var csv = rows.map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = filename + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ CSV indirildi!');
+}
+
+// ── STAFF MGMT ──────────────────────────────────────────
+async function addStaff() {
+  var inp = document.getElementById('newStaffName'), name = inp.value.trim();
+  if (!name) { toast('❌ Ad Soyad giriniz!'); return; }
+  if (staffList.indexOf(name) >= 0) { toast('⚠️ Bu personel zaten var!'); return; }
+  showLoad(true);
+  try { await sbFetch('staff', 'POST', { name: name }); await loadStaff(); inp.value = ''; renderStaffMgmt(); toast('✅ ' + name + ' eklendi!'); }
+  catch(e) { toast('❌ Hata oluştu!'); console.error(e); }
+  showLoad(false);
+}
+
+async function removeStaff(name) {
+  if (!confirm(name + ' silinsin mi?')) return;
+  showLoad(true);
+  try { await sbFetch('staff?name=eq.' + encodeURIComponent(name), 'DELETE'); await loadStaff(); renderStaffMgmt(); toast('🗑️ ' + name + ' silindi.'); }
+  catch(e) { toast('❌ Hata oluştu!'); }
+  showLoad(false);
+}
+
+function renderStaffMgmt() {
+  var el = document.getElementById('staffMgmtList');
+  if (!staffList.length) { el.innerHTML = '<div class="empty">Henüz personel eklenmemiş</div>'; return; }
+  el.innerHTML = staffList.map(function(s) {
+    return '<div class="prs-item"><div class="prs-avatar">' + s.charAt(0).toUpperCase() + '</div><span class="prs-name">' + eh(s) + '</span><button class="prs-del" onclick="removeStaff(\'' + ej(s) + '\')"><i class="ti ti-trash"></i></button></div>';
+  }).join('');
+}
+
+// ── CSV IMPORT ───────────────────────────────────────────
+async function importCSV(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    var text = e.target.result;
+    var lines = text.replace(/\r/g, '').split('\n').filter(function(l) { return l.trim(); });
+    if (lines.length < 2) { toast('❌ Geçersiz CSV!'); return; }
+
+    var result = document.getElementById('importResult');
+    result.style.display = 'block';
+    result.textContent = 'İşleniyor...';
+    result.style.color = '#facc15';
+    showLoad(true);
+
+    var ok = 0, fail = 0;
+    for (var i = 1; i < lines.length; i++) {
+      var cols = lines[i].split(',').map(function(c) { return c.replace(/^"|"$/g, '').trim(); });
+      if (cols.length < 4) continue;
+      var name = cols[0], tur = cols[1], tarih = cols[2], saat = cols[3];
+      if (!name || !tur || !tarih || !saat) continue;
+      var dp = tarih.split('/');
+      if (dp.length < 3) continue;
+      var day = parseInt(dp[0]), mon = parseInt(dp[1]), yr = parseInt(dp[2]);
+      var tp = saat.split(':');
+      if (tp.length < 2) continue;
+      var hr = parseInt(tp[0]), mn = parseInt(tp[1]);
+      if (isNaN(day)||isNaN(mon)||isNaN(yr)||isNaN(hr)||isNaN(mn)) continue;
+      // CSV times are already in Cyprus time (UTC+3), convert to UTC
+      var utcTs = localToUTC(yr + '-' + pad(mon) + '-' + pad(day), pad(hr) + ':' + pad(mn));
+      var type = tur === 'Giriş' ? 'in' : 'out';
+      try { await sbFetch('attendance', 'POST', { staff_name: name, type: type, timestamp: utcTs }); ok++; }
+      catch(e) { fail++; }
+    }
+    await loadLogs();
+    showLoad(false);
+    result.textContent = '✅ ' + ok + ' kayıt eklendi' + (fail > 0 ? ' | ❌ ' + fail + ' hata' : '');
+    result.style.color = '#4ade80';
+    toast('✅ CSV aktarıldı: ' + ok + ' kayıt');
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── STATS ────────────────────────────────────────────────
+function loadStats() {
+  var today = todayLocalStr().split('-').reverse().join('/');
+  var todayLogs = logs.filter(function(l) { return fmtDate(l.timestamp) === today; });
+  document.getElementById('statInToday').textContent  = todayLogs.filter(function(l) { return l.type === 'in'; }).length;
+  document.getElementById('statOutToday').textContent = todayLogs.filter(function(l) { return l.type === 'out'; }).length;
+
+  var todayHrs = calcHoursForLogs(todayLogs);
+  var totalMs = todayHrs.reduce(function(s, r) { return s + r.totalMs; }, 0);
+  document.getElementById('statHoursToday').textContent = totalMs > 0 ? msToHM(totalMs) : '0s';
+
+  var incomplete = todayLogs.filter(function(l) { return isIncomplete(l); });
+  document.getElementById('statIncompleteToday').textContent = incomplete.length;
+
+  // Active list
+  var active = staffList.filter(function(name) {
+    var ml = logs.filter(function(l) { return l.staff_name === name; });
+    var li = ml.filter(function(l) { return l.type === 'in'; })[0];
+    var lo = ml.filter(function(l) { return l.type === 'out'; })[0];
+    return li && (!lo || new Date(li.timestamp) > new Date(lo.timestamp));
+  });
+  var al = document.getElementById('activeList');
+  if (!active.length) { al.innerHTML = '<div class="empty" style="padding:20px">Şu an içeride personel yok</div>'; }
+  else { al.innerHTML = active.map(function(n) { return '<div class="log-item" style="display:flex;align-items:center;gap:10px"><div class="avatar">' + n.charAt(0).toUpperCase() + '</div><span class="log-name">' + eh(n) + '</span><span style="margin-left:auto;font-size:12px;color:#4ade80"><span class="online-dot"></span>İçeride</span></div>'; }).join(''); }
+
+  // Incomplete list
+  var incLogs = todayLogs.filter(function(l) { return isIncomplete(l); });
+  var il = document.getElementById('incompleteList');
+  if (!incLogs.length) { il.innerHTML = '<div class="empty" style="padding:20px">✅ Eksik kayıt yok</div>'; }
+  else { il.innerHTML = incLogs.map(function(l) { return '<div class="log-item warn" style="display:flex;align-items:center;gap:10px"><div class="avatar">' + l.staff_name.charAt(0).toUpperCase() + '</div><span class="log-name">' + eh(l.staff_name) + '</span><span style="margin-left:auto;font-size:12px;color:#facc15">⚠️ Çıkış yok</span></div>'; }).join(''); }
+}
+
+// ── SETTINGS ────────────────────────────────────────────
+function loadSettingsUI() {
+  document.getElementById('setLat').value    = WORK_LAT    || '';
+  document.getElementById('setLng').value    = WORK_LNG    || '';
+  document.getElementById('setRadius').value = WORK_RADIUS || 100;
+}
+
+async function saveLocSettings() {
+  var la = parseFloat(document.getElementById('setLat').value);
+  var ln = parseFloat(document.getElementById('setLng').value);
+  var r  = parseInt(document.getElementById('setRadius').value) || 100;
+  if (isNaN(la) || isNaN(ln)) { toast('❌ Geçerli koordinat giriniz!'); return; }
+  showLoad(true); WORK_LAT = la; WORK_LNG = ln; WORK_RADIUS = r;
+  await saveSetting('work_lat', la); await saveSetting('work_lng', ln); await saveSetting('work_radius', r);
+  showLoad(false); toast('✅ Konum kaydedildi!');
+}
+
+function useMyLocation() {
+  toast('📍 Konum alınıyor...');
+  navigator.geolocation.getCurrentPosition(
+    function(p) { document.getElementById('setLat').value = p.coords.latitude.toFixed(6); document.getElementById('setLng').value = p.coords.longitude.toFixed(6); toast('✅ Konum alındı — Kaydet tuşuna basın!'); },
+    function() { toast('❌ Konum alınamadı'); },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+async function changePassword() {
+  var np = document.getElementById('newPass').value, np2 = document.getElementById('newPass2').value;
+  if (np.length < 4) { toast('❌ En az 4 karakter!'); return; }
+  if (np !== np2) { toast('❌ Şifreler eşleşmiyor!'); return; }
+  showLoad(true); ADMIN_PASS = np; localStorage.setItem('adminPass', np);
+  await saveSetting('admin_pass', np);
+  document.getElementById('newPass').value = ''; document.getElementById('newPass2').value = '';
+  showLoad(false); toast('✅ Şifre değiştirildi!');
+}
+
+async function clearAllLogs() {
+  if (!confirm('Tüm kayıtlar silinecek. Emin misiniz?')) return;
+  showLoad(true);
+  try { await sbFetch('attendance?id=gt.0', 'DELETE'); rejected = 0; localStorage.setItem('rejectedCount', '0'); await loadLogs(); loadAdminData(); toast('🗑️ Tüm kayıtlar silindi.'); }
+  catch(e) { toast('❌ Hata!'); }
+  showLoad(false);
+}
+
+async function loadAdminData() {
+  showLoad(true);
+  try {
+    await loadSettings(); await loadStaff(); await loadLogs();
+    renderLogs(); loadStats(); renderStaffMgmt(); loadSettingsUI();
+  } catch(e) { toast('❌ Bağlantı hatası!'); console.error(e); }
+  showLoad(false);
+}
+
+// ── EXCEL EXPORT ─────────────────────────────────────────
+function exportExcel() {
+  runReport();
+  if (!reportResults.length) { toast('❌ Önce raporu çalıştırın!'); return; }
+
+  var wb = XLSX.utils.book_new();
+
+  // ── SHEET 1: ÖZET ──────────────────────────────────────
+  var hrs = calcHoursForLogs(reportResults);
+  var hrsMap = {};
+  hrs.forEach(function(r) { hrsMap[r.name] = r; });
+
+  var summaryData = [
+    ['RIA LOUNGE CAFE — PERSONEL ÇALIŞMA RAPORU'],
+    ['Oluşturulma: ' + fmtDate(new Date().toISOString())],
+    [],
+    ['Ad Soyad', 'Giriş Sayısı', 'Çıkış Sayısı', 'Toplam Süre', 'Toplam Dakika', 'Durum'],
+  ];
+
+  staffList.forEach(function(name) {
+    var hr = hrsMap[name];
+    if (!hr) return;
+    var inCount  = reportResults.filter(function(l) { return l.staff_name===name && l.type==='in'; }).length;
+    var outCount = reportResults.filter(function(l) { return l.staff_name===name && l.type==='out'; }).length;
+    var mins = Math.floor(hr.totalMs / 60000);
+    summaryData.push([
+      name,
+      inCount,
+      outCount,
+      msToHM(hr.totalMs),
+      mins,
+      hr.incomplete ? '⚠️ Eksik Kayıt' : '✅ Tam'
+    ]);
+  });
+
+  var ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws1['!cols'] = [{wch:25},{wch:14},{wch:14},{wch:14},{wch:16},{wch:16}];
+  ws1['!merges'] = [{s:{r:0,c:0},e:{r:0,c:5}}];
+  XLSX.utils.book_append_sheet(wb, ws1, '📊 Özet');
+
+  // ── SHEET 2: GÜNLÜK DETAY ──────────────────────────────
+  var dailyData = [['Ad Soyad','Tarih','Gün','Giriş','Çıkış','Çalışma Süresi','Konum','Durum']];
+
+  // Group by person and day
+  var byPersonDay = {};
+  reportResults.forEach(function(l) {
+    var key = l.staff_name + '|' + fmtDate(l.timestamp);
+    if (!byPersonDay[key]) byPersonDay[key] = { name: l.staff_name, date: fmtDate(l.timestamp), ins: [], outs: [] };
+    if (l.type === 'in')  byPersonDay[key].ins.push(l);
+    if (l.type === 'out') byPersonDay[key].outs.push(l);
+  });
+
+  Object.keys(byPersonDay).sort().forEach(function(key) {
+    var g = byPersonDay[key];
+    var inTime  = g.ins.length  ? fmtTime(g.ins[0].timestamp)  : '—';
+    var outTime = g.outs.length ? fmtTime(g.outs[g.outs.length-1].timestamp) : '—';
+    var dur = '—', status = '⚠️ Eksik';
+    if (g.ins.length && g.outs.length) {
+      var ms = new Date(g.outs[g.outs.length-1].timestamp) - new Date(g.ins[0].timestamp);
+      if (ms > 0) { dur = msToHM(ms); status = '✅ Tam'; }
+    }
+    var dayName = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][new Date(g.ins[0] ? g.ins[0].timestamp : g.outs[0].timestamp).getDay()];
+    var hasLoc = (g.ins[0] && g.ins[0].lat) || (g.outs[0] && g.outs[0].lat);
+    dailyData.push([g.name, g.date, dayName, inTime, outTime, dur, hasLoc ? '✓ Doğrulandı' : '—', status]);
+  });
+
+  var ws2 = XLSX.utils.aoa_to_sheet(dailyData);
+  ws2['!cols'] = [{wch:22},{wch:12},{wch:8},{wch:10},{wch:10},{wch:16},{wch:14},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, '📋 Günlük');
+
+  // ── SHEET 3: TÜM KAYITLAR ──────────────────────────────
+  var allData = [['#','Ad Soyad','Tür','Tarih','Saat','Konum','Toplam Süre','Durum']];
+  reportResults.forEach(function(l, i) {
+    var hr = hrsMap[l.staff_name];
+    allData.push([
+      i+1,
+      l.staff_name,
+      l.type==='in'?'Giriş':'Çıkış',
+      fmtDate(l.timestamp),
+      fmtTime(l.timestamp),
+      l.lat ? '✓' : '—',
+      hr ? msToHM(hr.totalMs) : '—',
+      isIncomplete(l) ? '⚠️ Eksik' : '✅ Tam'
+    ]);
+  });
+
+  var ws3 = XLSX.utils.aoa_to_sheet(allData);
+  ws3['!cols'] = [{wch:5},{wch:22},{wch:10},{wch:12},{wch:10},{wch:12},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws3, '📝 Tüm Kayıtlar');
+
+  XLSX.writeFile(wb, 'ria_rapor_' + todayLocalStr() + '.xlsx');
+  toast('✅ Excel indirildi!');
+}
+
+function exportHoursExcel() {
+  if (!hoursResults.length) { runHours(); }
+  if (!hoursResults.length) { toast('❌ Önce hesapla!'); return; }
+
+  var wb = XLSX.utils.book_new();
+  var period = document.getElementById('hoursPeriod');
+  var periodText = period ? period.options[period.selectedIndex].text : 'Rapor';
+
+  // ── SHEET 1: KİŞİSEL ÖZET ──────────────────────────────
+  var summaryData = [
+    ['RIA LOUNGE CAFE — ÇALIŞMA SAATİ RAPORU'],
+    ['Periyot: ' + periodText + ' | ' + fmtDate(new Date().toISOString())],
+    [],
+    ['Ad Soyad', 'Toplam Süre', 'Toplam Dakika', 'Seans Sayısı', 'Eksik Kayıt', 'Durum'],
+  ];
+
+  hoursResults.forEach(function(r) {
+    summaryData.push([
+      r.name,
+      msToHM(r.totalMs),
+      Math.floor(r.totalMs / 60000),
+      r.sessions.length,
+      r.incomplete ? 'Evet ⚠️' : 'Hayır',
+      r.incomplete ? '⚠️ Eksik Kayıt Var' : '✅ Tam'
+    ]);
+  });
+
+  // Total row
+  var totalMs = hoursResults.reduce(function(s,r){return s+r.totalMs;},0);
+  summaryData.push([]);
+  summaryData.push(['TOPLAM', msToHM(totalMs), Math.floor(totalMs/60000), '', '', '']);
+
+  var ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws1['!cols'] = [{wch:25},{wch:14},{wch:16},{wch:14},{wch:14},{wch:20}];
+  ws1['!merges'] = [{s:{r:0,c:0},e:{r:0,c:5}}];
+  XLSX.utils.book_append_sheet(wb, ws1, '📊 Özet');
+
+  // ── SHEET 2: SEANS DETAYI ──────────────────────────────
+  var sessionData = [['Ad Soyad','Seans No','Giriş','Çıkış','Süre','Durum']];
+  hoursResults.forEach(function(r) {
+    r.sessions.forEach(function(s, i) {
+      sessionData.push([
+        r.name,
+        i + 1,
+        fmtDT(s.in),
+        s.out ? fmtDT(s.out) : '⚠️ Çıkış yok',
+        s.ms > 0 ? msToHM(s.ms) : '—',
+        s.out ? '✅ Tamamlandı' : '⚠️ Devam ediyor / Eksik'
+      ]);
+    });
+  });
+
+  var ws2 = XLSX.utils.aoa_to_sheet(sessionData);
+  ws2['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:18},{wch:12},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, ws2, '⏱️ Seans Detayı');
+
+  XLSX.writeFile(wb, 'ria_saatler_' + todayLocalStr() + '.xlsx');
+  toast('✅ Excel indirildi!');
+}
+
+// ── HELPERS ─────────────────────────────────────────────
+function pad(n) { return n.toString().padStart(2, '0'); }
+function eh(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function ej(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+function toast(msg) { var e = document.getElementById('toast'); e.textContent = msg; e.style.display = 'block'; setTimeout(function() { e.style.display = 'none'; }, 3000); }
+
+// ── INIT ────────────────────────────────────────────────
+(async function() {
+  showLoad(true);
+  try { await loadSettings(); await loadStaff(); await loadLogs(); }
+  catch(e) { console.error('Init error:', e); }
+  showLoad(false);
+})();
+</script>
+</body>
+</html>
